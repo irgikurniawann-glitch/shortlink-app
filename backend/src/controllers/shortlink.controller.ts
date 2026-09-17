@@ -1,48 +1,54 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
+import { AuthRequest } from "../middleware/auth.middleware";
 
-export const createShortLink = async (req: Request, res: Response) => {
+export const createShortLink = async (
+  req: AuthRequest,
+  res: Response
+) => {
   try {
     const { url, code } = req.body;
-    console.log("CODE DARI REQUEST:", JSON.stringify(code));
+
     if (!url) {
       return res.status(400).json({
         message: "URL wajib diisi",
       });
     }
+
     if (code) {
-  const existingShortLink = await prisma.shortLink.findUnique({
-    where: {
-      code,
-    },
-  });
-console.log("HASIL CEK CODE:", existingShortLink);
-  if (existingShortLink) {
-    return res.status(409).json({
-      message:
-        "Nama short link sudah digunakan. Silakan pilih nama lain.",
-    });
-  }
-}
+      const existingShortLink = await prisma.shortLink.findUnique({
+        where: {
+          code,
+        },
+      });
+
+      if (existingShortLink) {
+        return res.status(409).json({
+          message:
+            "Nama short link sudah digunakan. Silakan pilih nama lain.",
+        });
+      }
+    }
 
     const shortLink = await prisma.shortLink.create({
-  data: {
-    code: code || Math.random().toString(36).substring(2, 8),
-    url,
-  },
-});
+      data: {
+        code: code || Math.random().toString(36).substring(2, 8),
+        url,
+        userId: req.user!.userId,
+      },
+    });
 
     return res.status(201).json({
       message: "Short link berhasil dibuat",
       data: shortLink,
     });
-} catch (error) {
-  console.error(error);
+  } catch (error) {
+    console.error(error);
 
-  return res.status(500).json({
-    message: "Gagal membuat short link",
-  });
-}
+    return res.status(500).json({
+      message: "Gagal membuat short link",
+    });
+  }
 };
 
 export const redirectShortLink = async (
@@ -62,8 +68,7 @@ export const redirectShortLink = async (
       return res.status(404).json({
         message: "Short link tidak ditemukan",
       });
-      
-    }
+ }
 
     await prisma.shortLink.update({
       where: {
@@ -83,11 +88,11 @@ export const redirectShortLink = async (
     return res.status(500).json({
       message: "Gagal melakukan redirect",
     });
-    
-  }
+ }
 };
+
 export const updateShortLink = async (
-  req: Request<{ code: string }>,
+  req: AuthRequest & { params: { code: string } },
   res: Response
 ) => {
   try {
@@ -100,9 +105,10 @@ export const updateShortLink = async (
       });
     }
 
-    const existingShortLink = await prisma.shortLink.findUnique({
+    const existingShortLink = await prisma.shortLink.findFirst({
       where: {
         code,
+        userId: req.user!.userId,
       },
     });
 
@@ -114,14 +120,13 @@ export const updateShortLink = async (
 
     const updatedShortLink = await prisma.shortLink.update({
       where: {
-        code,
+        id: existingShortLink.id,
       },
       data: {
         url,
       },
     });
     
-
     return res.json({
       message: "Short link berhasil diperbarui",
       data: updatedShortLink,
@@ -133,18 +138,26 @@ export const updateShortLink = async (
       message: "Gagal memperbarui short link",
     });
   }
-  
+
 };
+
 export const deleteShortLink = async (
-  req: Request<{ code: string }>,
+  req: AuthRequest,
   res: Response
 ) => {
   try {
-    const { code } = req.params;
+    const code = req.params.code;
 
-    const existingShortLink = await prisma.shortLink.findUnique({
+if (typeof code !== "string") {
+  return res.status(400).json({
+    message: "Code short link tidak valid",
+  });
+}
+
+    const existingShortLink = await prisma.shortLink.findFirst({
       where: {
         code,
+        userId: req.user!.userId,
       },
     });
 
@@ -156,7 +169,7 @@ export const deleteShortLink = async (
 
     await prisma.shortLink.delete({
       where: {
-        code,
+        id: existingShortLink.id,
       },
     });
 
@@ -171,12 +184,16 @@ export const deleteShortLink = async (
     });
   }
 };
+
 export const getShortLinks = async (
-  _req: Request,
+  req: AuthRequest,
   res: Response
 ) => {
   try {
     const shortLinks = await prisma.shortLink.findMany({
+      where: {
+        userId: req.user!.userId,
+      },
       orderBy: {
         createdAt: "desc",
       },

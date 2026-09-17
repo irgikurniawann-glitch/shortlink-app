@@ -1,4 +1,4 @@
-import { redirect, notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 
 type PageProps = {
   params: Promise<{
@@ -13,19 +13,5 @@ export default async function ShortLinkPage({
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  const response = await fetch(
-    `${apiUrl}/api/shortlinks/${code}`,
-    {
-      redirect: "manual",
-      cache: "no-store",
-    }
-  );
-
-  const location = response.headers.get("location");
-
-  if (!location) {
-    notFound();
-  }
-
-  redirect(location);
+  redirect(`${apiUrl}/api/shortlinks/${code}`);
 }

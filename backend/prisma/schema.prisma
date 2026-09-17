@@ -7,10 +7,21 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id        String      @id @default(cuid())
+  email     String      @unique
+  password  String
+  createdAt DateTime    @default(now())
+
+  shortLinks ShortLink[]
+}
+
 model ShortLink {
   id        String   @id @default(cuid())
   code      String   @unique
   url       String
   clicks    Int      @default(0)
   createdAt DateTime @default(now())
+userId    String?
+user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
