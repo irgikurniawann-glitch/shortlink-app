@@ -1,0 +1,5 @@
+backend/.agents/
+backend/.claude/
+backend/.windsurf/
+backend/dist/
+backend/src/**/*.js

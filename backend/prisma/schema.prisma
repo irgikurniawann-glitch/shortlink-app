@@ -1,0 +1,16 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model ShortLink {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  url       String
+  clicks    Int      @default(0)
+  createdAt DateTime @default(now())
+}
