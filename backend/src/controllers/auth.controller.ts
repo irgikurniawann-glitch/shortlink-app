@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { prisma } from "../lib/prisma";
+import crypto from "crypto";
+import { sendVerificationEmail } from "../services/email.service";
 
 export const register = async (
   req: Request,
@@ -40,7 +42,25 @@ export const register = async (
         email,
         password: hashedPassword,
       },
-    });
+    }); 
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+
+await prisma.emailVerificationToken.create({
+  data: {
+    token: verificationToken,
+    userId: user.id,
+    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+  },
+});
+
+const verificationUrl =
+  `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
+
+await sendVerificationEmail(
+  user.email,
+  verificationUrl
+);
+    
 
     return res.status(201).json({
       message: "Registrasi berhasil",
@@ -54,6 +74,61 @@ export const register = async (
 
     return res.status(500).json({
       message: "Gagal melakukan registrasi",
+    });
+  }
+};
+export const verifyEmail = async (req: Request, res: Response) => {
+  try {
+    const { token } = req.query;
+
+    if (!token || typeof token !== "string") {
+      return res.status(400).json({
+        message: "Token verifikasi tidak valid",
+      });
+    }
+
+    const verificationToken =
+      await prisma.emailVerificationToken.findUnique({
+        where: {
+          token,
+        },
+      });
+
+    if (!verificationToken) {
+      return res.status(400).json({
+        message: "Token verifikasi tidak ditemukan",
+      });
+    }
+
+    if (verificationToken.expiresAt < new Date()) {
+      return res.status(400).json({
+        message: "Token verifikasi sudah kedaluwarsa",
+      });
+    }
+
+    await prisma.user.update({
+      where: {
+        id: verificationToken.userId,
+      },
+      data: {
+        emailVerified: true,
+      },
+    });
+
+    await prisma.emailVerificationToken.delete({
+      where: {
+        id: verificationToken.id,
+      },
+    });
+
+    return res.json({
+      message: "Email berhasil diverifikasi",
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Gagal melakukan verifikasi email",
     });
   }
 };
@@ -90,6 +165,11 @@ export const login = async (
         message: "Email atau password salah",
       });
     }
+    if (!user.emailVerified) {
+  return res.status(403).json({
+    message: "Email belum diverifikasi. Silakan cek email kamu.",
+  });
+}
 const jwtSecret = process.env.JWT_SECRET;
 
 if (!jwtSecret) {

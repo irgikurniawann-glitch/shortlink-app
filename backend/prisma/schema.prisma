@@ -8,10 +8,12 @@ datasource db {
 }
 
 model User {
-  id        String      @id @default(cuid())
-  email     String      @unique
-  password  String
-  createdAt DateTime    @default(now())
+  emailVerificationTokens EmailVerificationToken[]
+  id            String      @id @default(cuid())
+  email         String      @unique
+  password      String
+  emailVerified Boolean     @default(false)
+  createdAt     DateTime    @default(now())
 
   shortLinks ShortLink[]
 }
@@ -24,4 +26,13 @@ model ShortLink {
   createdAt DateTime @default(now())
 userId    String?
 user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+model EmailVerificationToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

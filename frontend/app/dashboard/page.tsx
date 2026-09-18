@@ -2,7 +2,9 @@
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { QRCodeCanvas } from "qrcode.react";
+
 type ShortLink = {
   id: string;
   code: string;
@@ -13,7 +15,6 @@ type ShortLink = {
 
 export default function DashboardPage() {
   const router = useRouter();
-
   const [url, setUrl] = useState("");
   const [customCode, setCustomCode] = useState("");
   const [shortLinks, setShortLinks] = useState<ShortLink[]>([]);
@@ -23,7 +24,7 @@ export default function DashboardPage() {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [qrCode, setQrCode] = useState<string | null>(null);
 
-  // State untuk modal/inline edit
+  // State untuk modal edit
   const [editingItem, setEditingItem] = useState<ShortLink | null>(null);
   const [editUrl, setEditUrl] = useState("");
   const [updating, setUpdating] = useState(false);
@@ -49,7 +50,9 @@ export default function DashboardPage() {
 
     try {
       const response = await fetch(`${apiUrl}/api/shortlinks`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (response.status === 401) {
@@ -68,15 +71,14 @@ export default function DashboardPage() {
     }
   }, [apiUrl, getAuthToken, handleUnauthorized]);
 
- useEffect(() => {
-  fetchShortLinks();
-
-  const interval = setInterval(() => {
+  useEffect(() => {
     fetchShortLinks();
-  }, 3000);
+    const interval = setInterval(() => {
+      fetchShortLinks();
+    }, 3000);
 
-  return () => clearInterval(interval);
-}, [fetchShortLinks]);
+    return () => clearInterval(interval);
+  }, [fetchShortLinks]);
 
   const handleCreate = async (event: FormEvent) => {
     event.preventDefault();
@@ -131,19 +133,18 @@ export default function DashboardPage() {
     setCopiedCode(code);
     setTimeout(() => setCopiedCode(null), 2000);
   };
+
   const handleDownloadQR = (code: string) => {
-  const canvas = document.getElementById(
-    `qr-${code}`
-  ) as HTMLCanvasElement | null;
+    const canvas = document.getElementById(
+      `qr-${code}`
+    ) as HTMLCanvasElement | null;
+    if (!canvas) return;
 
-  if (!canvas) return;
-
-  const link = document.createElement("a");
-
-  link.download = `qr-${code}.png`;
-  link.href = canvas.toDataURL("image/png");
-  link.click();
-};
+    const link = document.createElement("a");
+    link.download = `qr-${code}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  };
 
   const startEditing = (link: ShortLink) => {
     setEditingItem(link);
@@ -192,7 +193,6 @@ export default function DashboardPage() {
           item.code === editingItem.code ? { ...item, url: result.data.url } : item
         )
       );
-
       setEditingItem(null);
     } catch (error) {
       console.error(error);
@@ -214,7 +214,9 @@ export default function DashboardPage() {
     try {
       const response = await fetch(`${apiUrl}/api/shortlinks/${code}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (response.status === 401) {
@@ -236,218 +238,257 @@ export default function DashboardPage() {
   };
 
   const handleLogout = () => {
-  localStorage.removeItem("token");
-  router.push("/");
-};
+    localStorage.removeItem("token");
+    router.push("/");
+  };
+
+  const totalClicks = shortLinks.reduce((acc, curr) => acc + (curr.clicks || 0), 0);
 
   return (
-    <main className="min-h-screen bg-gray-50/50 px-4 py-8">
-      <div className="mx-auto max-w-3xl">
-        <header className="mb-8 flex items-center justify-between pb-4 border-b border-gray-200">
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-gray-900">
-              Dashboard Link
-            </h1>
-            <p className="text-xs text-gray-500 mt-0.5">
-              Kelola dan pantau seluruh tautan singkat kamu.
-            </p>
-          </div>
+    <div className="relative flex min-h-screen flex-col bg-slate-50 text-slate-800 selection:bg-indigo-500 selection:text-white">
+      {/* Soft Background Grid Decorator */}
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(to_right,#e2e8f080_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f080_1px,transparent_1px)] bg-[size:3rem_3rem]" />
+
+      {/* Header */}
+      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/80 backdrop-blur-md shadow-xs">
+        <nav className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
+          <Link
+            href="/"
+            className="text-xl font-black tracking-tight text-slate-900 transition hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 rounded-md"
+          >
+            Shortlink<span className="text-indigo-600">.</span>
+          </Link>
 
           <button
             type="button"
             onClick={handleLogout}
-            className="rounded-lg border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 transition shadow-sm"
+            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-xs transition hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 active:scale-95"
           >
             Keluar
           </button>
-        </header>
+        </nav>
+      </header>
 
-        {/* Form Buat Link */}
-        <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-gray-900">
-            Buat Short Link Baru
-          </h2>
-
-          <form onSubmit={handleCreate} className="mt-4 space-y-4">
+      {/* Main Content */}
+      <main className="flex-1 px-4 py-8 sm:px-6">
+        <div className="mx-auto max-w-4xl space-y-8">
+          
+          {/* Header Dashboard & Ringkasan Statistik */}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <label
-                htmlFor="url"
-                className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-1"
-              >
-                URL Tujuan
-              </label>
-              <input
-                id="url"
-                type="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://contoh-tautan-panjang.com/halaman"
-                required
-                className="w-full rounded-lg border border-gray-300 px-3.5 py-2 text-sm text-gray-900 outline-none transition focus:border-black focus:ring-1 focus:ring-black placeholder:text-gray-400"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="customCode"
-                className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-1"
-              >
-                Custom Slug <span className="text-gray-400 font-normal">(opsional)</span>
-              </label>
-              <input
-                id="customCode"
-                type="text"
-                value={customCode}
-                onChange={(e) =>
-                  setCustomCode(
-                    e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "")
-                  )
-                }
-                placeholder="promo-2026"
-                className="w-full rounded-lg border border-gray-300 px-3.5 py-2 text-sm text-gray-900 outline-none transition focus:border-black focus:ring-1 focus:ring-black placeholder:text-gray-400"
-              />
-            </div>
-
-            {message && (
-              <div className="rounded-lg border border-red-100 bg-red-50 p-3 text-xs text-red-600">
-                {message}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-lg bg-gray-900 py-2.5 text-sm font-medium text-white hover:bg-black transition disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {loading ? "Membuat..." : "Shorten Link"}
-            </button>
-          </form>
-        </section>
-
-        {/* List Link */}
-        <section className="mt-8">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-base font-semibold text-gray-900">
-              Daftar Tautan
-            </h2>
-            <span className="text-xs font-medium text-gray-500 bg-gray-200/60 px-2 py-0.5 rounded-full">
-              {shortLinks.length} total
-            </span>
-          </div>
-
-          {fetching ? (
-            <div className="p-8 text-center text-sm text-gray-400">
-              Memuat data...
-            </div>
-          ) : shortLinks.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-center">
-              <p className="text-sm text-gray-500">
-                Belum ada short link yang dibuat.
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+                Dashboard Link
+              </h1>
+              <p className="mt-1 text-sm text-slate-500">
+                Kelola tautan singkat dan pantau statistik kunjungan kamu.
               </p>
             </div>
-          ) : (
-            <div className="space-y-3">
-              {shortLinks.map((link) => (
-                <div
-                  key={link.id || link.code}
-                  className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-gray-300"
+
+            {/* Stats Cards */}
+            <div className="flex gap-3">
+              <div className="rounded-2xl border border-slate-200/80 bg-white px-5 py-3 shadow-xs min-w-[120px]">
+                <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Link</span>
+                <span className="text-xl font-extrabold text-indigo-600">{shortLinks.length}</span>
+              </div>
+              <div className="rounded-2xl border border-slate-200/80 bg-white px-5 py-3 shadow-xs min-w-[120px]">
+                <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Klik</span>
+                <span className="text-xl font-extrabold text-purple-600">{totalClicks}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Form Buat Link */}
+          <section className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm sm:p-7">
+            <h2 className="text-base font-bold text-slate-900">
+              Buat Short Link Baru
+            </h2>
+
+            <form onSubmit={handleCreate} className="mt-5 space-y-4">
+              <div>
+                <label
+                  htmlFor="url"
+                  className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2"
                 >
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-gray-900 text-sm">
-                          /{link.code}
-                        </span>
+                  URL Tujuan
+                </label>
+                <input
+                  id="url"
+                  type="url"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://contoh-tautan-panjang.com/halaman"
+                  required
+                  className="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 transition focus:border-indigo-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600/20"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="customCode"
+                  className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2"
+                >
+                  Custom Slug <span className="text-slate-400 font-normal">(opsional)</span>
+                </label>
+                <input
+                  id="customCode"
+                  type="text"
+                  value={customCode}
+                  onChange={(e) =>
+                    setCustomCode(
+                      e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "")
+                    )
+                  }
+                  placeholder="promo-2026"
+                  className="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 transition focus:border-indigo-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600/20"
+                />
+              </div>
+
+              {message && (
+                <div
+                  role="alert"
+                  className="rounded-xl border border-rose-200 bg-rose-50 p-3.5 text-xs font-medium text-rose-700"
+                >
+                  {message}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-xl bg-indigo-600 py-3.5 text-sm font-semibold text-white shadow-md shadow-indigo-600/15 transition hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {loading ? "Membuat Short Link..." : "Shorten Link"}
+              </button>
+            </form>
+          </section>
+
+          {/* List Link */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-bold text-slate-900">
+                Daftar Tautan
+              </h2>
+              <span className="rounded-full bg-slate-200/70 px-3 py-1 text-xs font-semibold text-slate-600">
+                {shortLinks.length} total
+              </span>
+            </div>
+
+            {fetching ? (
+              <div className="rounded-2xl border border-slate-200/80 bg-white p-12 text-center text-sm text-slate-400 shadow-xs">
+                Memuat data link...
+              </div>
+            ) : shortLinks.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center shadow-xs">
+                <p className="text-sm font-medium text-slate-500">
+                  Belum ada short link yang dibuat. Mulai buat link pertama kamu di atas!
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {shortLinks.map((link) => (
+                  <div
+                    key={link.id || link.code}
+                    className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition duration-200 hover:border-slate-300 hover:shadow-md"
+                  >
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <div className="flex items-center gap-3">
+                          <span className="font-bold text-indigo-600 text-base">
+                            /{link.code}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleCopy(link.code)}
+                            className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-900"
+                          >
+                            {copiedCode === link.code ? "✓ Tersalin" : "📋 Salin"}
+                          </button>
+                        </div>
+
+                        <p className="truncate text-xs text-slate-500 max-w-lg">
+                          {link.url}
+                        </p>
+
+                        <div className="flex items-center gap-2 pt-1">
+                          <span className="inline-flex items-center gap-1.5 rounded-md bg-indigo-50 px-2.5 py-0.5 text-[11px] font-semibold text-indigo-700 border border-indigo-100">
+                             {link.clicks} kali diklik
+                          </span>
+                        </div>
+
+                        {/* QR Code Container */}
+                        {qrCode === link.code && (
+                          <div className="mt-4 flex flex-col items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                            <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-xs">
+                              <QRCodeCanvas
+                                id={`qr-${link.code}`}
+                                value={`${window.location.origin}/${link.code}`}
+                                size={150}
+                                level="H"
+                              />
+                            </div>
+                            <p className="text-xs text-slate-500">
+                              Scan QR Code ini untuk membuka tautan langsung.
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => handleDownloadQR(link.code)}
+                              className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-black"
+                            >
+                              Download QR (.PNG)
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Control Buttons */}
+                      <div className="flex shrink-0 items-center gap-2 border-t border-slate-100 pt-3 sm:border-t-0 sm:pt-0">
                         <button
                           type="button"
-                          onClick={() => handleCopy(link.code)}
-                          className="text-xs text-gray-500 hover:text-black font-medium transition"
+                          onClick={() => setQrCode(qrCode === link.code ? null : link.code)}
+                          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 hover:text-slate-900"
                         >
-                          {copiedCode === link.code ? "✓ Tersalin" : "Salin"}
+                          {qrCode === link.code ? "Tutup QR" : "QR Code"}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => startEditing(link)}
+                          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 hover:text-slate-900"
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(link.code)}
+                          className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600 transition hover:bg-rose-100 hover:text-rose-700"
+                        >
+                          Hapus
                         </button>
                       </div>
-
-                      <p className="mt-1 truncate text-xs text-gray-500">
-                        {link.url}
-                      </p>
-                      {qrCode === link.code && (
-  <div className="mt-4 flex flex-col items-start gap-2">
-    <div className="rounded-lg border border-gray-200 bg-white p-3">
-      <QRCodeCanvas
-  id={`qr-${link.code}`}
-  value={`${window.location.origin}/${link.code}`}
-  size={160}
-  level="H"
-/>
-    </div>
-
-    <p className="text-xs text-gray-400">
-      Scan QR Code untuk membuka short link.
-    </p>
-    <button
-  type="button"
-  onClick={() => handleDownloadQR(link.code)}
-  className="rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-black transition"
->
-  Download QR
-</button>
-  </div>
-)}
-
-                      <div className="mt-2 flex items-center gap-3 text-xs text-gray-400">
-                        <span>{link.clicks} kali diklik</span>
-                      </div>
                     </div>
-
-                    <div className="flex shrink-0 items-center gap-2">
-  <button
-    type="button"
-    onClick={() =>
-      setQrCode(qrCode === link.code ? null : link.code)
-    }
-    className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition"
-  >
-    QR Code
-  </button>
-
-  <button
-    type="button"
-    onClick={() => startEditing(link)}
-    className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition"
-  >
-    Edit
-  </button>
-
-  <button
-    type="button"
-    onClick={() => handleDelete(link.code)}
-    className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition"
-  >
-    Hapus
-  </button>
-</div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+      </main>
 
       {/* Modal Edit URL */}
       {editingItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-xl">
-            <h3 className="text-base font-semibold text-gray-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
+            <h3 className="text-lg font-bold text-slate-900">
               Edit Target URL
             </h3>
-            <p className="text-xs text-gray-500 mt-1">
-              Ubah tujuan untuk slug <span className="font-bold text-gray-800">/{editingItem.code}</span>
+            <p className="mt-1 text-xs text-slate-500">
+              Ubah tujuan URL untuk slug <span className="font-semibold text-indigo-600">/{editingItem.code}</span>
             </p>
 
-            <form onSubmit={handleUpdate} className="mt-4 space-y-4">
+            <form onSubmit={handleUpdate} className="mt-5 space-y-4">
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                   URL Baru
                 </label>
                 <input
@@ -455,30 +496,30 @@ export default function DashboardPage() {
                   value={editUrl}
                   onChange={(e) => setEditUrl(e.target.value)}
                   required
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-black focus:ring-1 focus:ring-black"
+                  className="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 transition focus:border-indigo-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600/20"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setEditingItem(null)}
-                  className="rounded-lg border border-gray-200 px-4 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50"
+                  className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={updating}
-                  className="rounded-lg bg-gray-900 px-4 py-2 text-xs font-medium text-white hover:bg-black transition disabled:opacity-50"
+                  className="rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-semibold text-white shadow-md shadow-indigo-600/15 transition hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 active:scale-95 disabled:opacity-50"
                 >
-                  {updating ? "Menyimpan..." : "Simpan"}
+                  {updating ? "Menyimpan..." : "Simpan Perubahan"}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-    </main>
+    </div>
   );
 }
