@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { prisma } from "../lib/prisma";
-import { AuthRequest } from "../middleware/auth.middleware";
+import { prisma } from "../lib/prisma.js";
+import { AuthRequest } from "../middleware/auth.middleware.js";
 
 export const createShortLink = async (
   req: AuthRequest,

@@ -1,17 +1,17 @@
 import { Router } from "express";
-import { authMiddleware } from "../middleware/auth.middleware";
+import { authMiddleware } from "../middleware/auth.middleware.js";
 import {
   register,
   login,
   verifyEmail,
-} from "../controllers/auth.controller";
+} from "../controllers/auth.controller.js";
 import {
   createShortLink,
   redirectShortLink,
   updateShortLink,
   deleteShortLink,
   getShortLinks,
-} from "../controllers/shortlink.controller";
+} from "../controllers/shortlink.controller.js";
 
 const router = Router();
 

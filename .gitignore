@@ -1,8 +1,14 @@
+node_modules/
+.env
+.env.local
+.next/
+
 backend/.agents/
 backend/.claude/
 backend/.windsurf/
 backend/dist/
 backend/src/**/*.js
 backend/skills-lock.json
+
 frontend/AGENTS.md
 frontend/CLAUDE.md

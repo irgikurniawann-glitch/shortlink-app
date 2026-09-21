@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { prisma } from "../lib/prisma";
+import { prisma } from "../lib/prisma.js";
 import crypto from "crypto";
-import { sendVerificationEmail } from "../services/email.service";
+import { sendVerificationEmail } from "../services/email.service.js";
 
 export const register = async (
   req: Request,
