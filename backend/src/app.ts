@@ -3,6 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import shortlinkRoutes from "./routes/shortlink.routes.js";
 
+import googleAuthRoutes from "./routes/google-auth.routes.js";
+
 dotenv.config();
 
 const app = express();
@@ -10,6 +12,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/api/shortlinks", shortlinkRoutes);
+app.use("/api/auth", googleAuthRoutes);
 
 app.get("/", (req, res) => {
   res.json({

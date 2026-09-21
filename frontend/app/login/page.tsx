@@ -12,6 +12,11 @@ export default function LoginPage() {
   const [isError, setIsError] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const handleGoogleLogin = () => {
+  window.location.href =
+    `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`;
+};
+
   const handleLogin = async (event: FormEvent) => {
     event.preventDefault();
     setMessage("");
@@ -147,6 +152,43 @@ if (result.data?.token) {
               {loading ? "Memproses..." : "Masuk ke Akun"}
             </button>
           </form>
+          <div className="my-6 flex items-center gap-3">
+  <div className="h-px flex-1 bg-slate-800" />
+  <span className="text-xs text-slate-500">ATAU</span>
+  <div className="h-px flex-1 bg-slate-800" />
+</div>
+
+<button
+  type="button"
+  onClick={handleGoogleLogin}
+  className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-700 bg-white py-3.5 px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 active:scale-[0.98]"
+>
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+  >
+    <path
+      fill="#4285F4"
+      d="M21.35 12.23c0-.79-.07-1.55-.2-2.27H12v4.3h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.42Z"
+    />
+    <path
+      fill="#34A853"
+      d="M12 21.5c2.63 0 4.84-.87 6.45-2.35l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.69-1.72-5.46-4.03H3.3v2.53A9.74 9.74 0 0 0 12 21.5Z"
+    />
+    <path
+      fill="#FBBC05"
+      d="M6.54 13.59A5.86 5.86 0 0 1 6.23 12c0-.55.1-1.09.31-1.59V7.88H3.3A9.5 9.5 0 0 0 2.25 12c0 1.53.37 2.98 1.05 4.12l3.24-2.53Z"
+    />
+    <path
+      fill="#EA4335"
+      d="M12 6.38c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.84 3.5 14.63 2.5 12 2.5a9.74 9.74 0 0 0-8.7 5.38l3.24 2.53c.77-2.31 2.92-4.03 5.46-4.03Z"
+    />
+  </svg>
+
+  Lanjutkan dengan Google
+</button>
 
           <p className="mt-8 text-center text-sm text-slate-400">
             Belum punya akun?{" "}

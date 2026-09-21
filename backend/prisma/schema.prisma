@@ -8,14 +8,17 @@ datasource db {
 }
 
 model User {
-  emailVerificationTokens EmailVerificationToken[]
-  id            String      @id @default(cuid())
-  email         String      @unique
-  password      String
-  emailVerified Boolean     @default(false)
-  createdAt     DateTime    @default(now())
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String?
+  googleId  String?  @unique
+  createdAt DateTime @default(now())
+
+  emailVerified Boolean @default(false)
 
   shortLinks ShortLink[]
+
+  emailVerificationTokens EmailVerificationToken[]
 }
 
 model ShortLink {
@@ -27,6 +30,7 @@ model ShortLink {
 userId    String?
 user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
 model EmailVerificationToken {
   id        String   @id @default(cuid())
   token     String   @unique

@@ -43,8 +43,14 @@ export const register = async (
         password: hashedPassword,
       },
     }); 
-    const verificationToken = crypto.randomBytes(32).toString("hex");
 
+    await prisma.emailVerificationToken.deleteMany({
+  where: {
+    userId: user.id,
+  },
+});
+
+const verificationToken = crypto.randomBytes(32).toString("hex");
 await prisma.emailVerificationToken.create({
   data: {
     token: verificationToken,
@@ -52,9 +58,14 @@ await prisma.emailVerificationToken.create({
     expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
   },
 });
+const frontendUrl = process.env.FRONTEND_URL;
+
+if (!frontendUrl) {
+  throw new Error("FRONTEND_URL belum diatur");
+}
 
 const verificationUrl =
-  `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
+  `${frontendUrl}/verify-email?token=${verificationToken}`;
 
 await sendVerificationEmail(
   user.email,
@@ -155,45 +166,46 @@ export const login = async (
       });
     }
 
-    const passwordMatch = await bcrypt.compare(
-      password,
-      user.password
-    );
+    if (!user.password) {
+  return res.status(401).json({
+    message: "Email atau password salah",
+  });
+}
 
+const passwordMatch = await bcrypt.compare(
+  password,
+  user.password
+);
     if (!passwordMatch) {
       return res.status(401).json({
         message: "Email atau password salah",
       });
     }
-    if (!user.emailVerified) {
-  return res.status(403).json({
-    message: "Email belum diverifikasi. Silakan cek email kamu.",
-  });
-}
-const jwtSecret = process.env.JWT_SECRET;
+       if (!user.emailVerified) {
+      return res.status(403).json({
+        message: "Email belum diverifikasi. Silakan cek email kamu.",
+      });
+    }
 
-if (!jwtSecret) {
-  throw new Error("JWT_SECRET belum diatur");
-}
+    const jwtSecret = process.env.JWT_SECRET;
 
-const token = jwt.sign(
-  {
-    userId: user.id,
-    email: user.email,
-  },
-  jwtSecret,
-  {
-    expiresIn: "7d",
-  }
-);
-   return res.json({
-  message: "Login berhasil",
-  data: {
-    id: user.id,
-    email: user.email,
-    token,
-  },
-});
+    if (!jwtSecret) {
+      throw new Error("JWT_SECRET belum diatur");}
+
+    const token = jwt.sign(
+      {userId: user.id,
+        email: user.email,}
+      ,jwtSecret,{expiresIn: "7d",}
+    );
+
+       return res.json({
+      message: "Login berhasil",
+      data: {
+        id: user.id,
+        email: user.email,
+        token,
+      },
+    });
   } catch (error) {
     console.error(error);
 

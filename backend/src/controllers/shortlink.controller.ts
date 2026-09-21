@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { nanoid } from "nanoid";
 import { prisma } from "../lib/prisma.js";
 import { AuthRequest } from "../middleware/auth.middleware.js";
 
@@ -32,7 +33,7 @@ export const createShortLink = async (
 
     const shortLink = await prisma.shortLink.create({
       data: {
-        code: code || Math.random().toString(36).substring(2, 8),
+        code: code || nanoid(6),
         url,
         userId: req.user!.userId,
       },
