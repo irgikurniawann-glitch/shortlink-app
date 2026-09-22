@@ -3,6 +3,15 @@ import { nanoid } from "nanoid";
 import { prisma } from "../lib/prisma.js";
 import { AuthRequest } from "../middleware/auth.middleware.js";
 
+const isValidUrl = (value: string) => {
+  try {
+    const url = new URL(value);
+
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+};
 export const createShortLink = async (
   req: AuthRequest,
   res: Response
@@ -10,34 +19,81 @@ export const createShortLink = async (
   try {
     const { url, code } = req.body;
 
-    if (!url) {
-      return res.status(400).json({
-        message: "URL wajib diisi",
-      });
-    }
+   if (!url || typeof url !== "string") {
+  return res.status(400).json({
+    message: "URL wajib diisi",
+  });
+}
 
-    if (code) {
-      const existingShortLink = await prisma.shortLink.findUnique({
-        where: {
-          code,
+if (!isValidUrl(url)) {
+  return res.status(400).json({
+    message: "URL tidak valid",
+  });
+}
+
+    if (code !== undefined) {
+  if (typeof code !== "string") {
+    return res.status(400).json({
+      message: "Code short link tidak valid",
+    });
+  }
+
+  if (!/^[a-z0-9-]+$/.test(code)) {
+    return res.status(400).json({
+      message:
+        "Code hanya boleh menggunakan huruf kecil, angka, dan tanda hubung (-)",
+    });
+  }
+
+  const existingShortLink = await prisma.shortLink.findUnique({
+    where: {
+      code,
+    },
+  });
+
+  if (existingShortLink) {
+    return res.status(409).json({
+      message:
+        "Nama short link sudah digunakan. Silakan pilih nama lain.",
+    });
+  }
+}
+
+    let shortLink;
+
+if (code) {
+  shortLink = await prisma.shortLink.create({
+    data: {
+      code,
+      url,
+      userId: req.user!.userId,
+    },
+  });
+} else {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const generatedCode = nanoid(6);
+
+    try {
+      shortLink = await prisma.shortLink.create({
+        data: {
+          code: generatedCode,
+          url,
+          userId: req.user!.userId,
         },
       });
 
-      if (existingShortLink) {
-        return res.status(409).json({
-          message:
-            "Nama short link sudah digunakan. Silakan pilih nama lain.",
-        });
+      break;
+    } catch (error) {
+      if (attempt === 4) {
+        throw error;
       }
     }
+  }
+}
 
-    const shortLink = await prisma.shortLink.create({
-      data: {
-        code: code || nanoid(6),
-        url,
-        userId: req.user!.userId,
-      },
-    });
+if (!shortLink) {
+  throw new Error("Gagal membuat short link");
+}
 
     return res.status(201).json({
       message: "Short link berhasil dibuat",
@@ -100,11 +156,17 @@ export const updateShortLink = async (
     const { code } = req.params;
     const { url } = req.body;
 
-    if (!url) {
-      return res.status(400).json({
-        message: "URL wajib diisi",
-      });
-    }
+    if (!url || typeof url !== "string") {
+  return res.status(400).json({
+    message: "URL wajib diisi",
+  });
+}
+
+if (!isValidUrl(url)) {
+  return res.status(400).json({
+    message: "URL tidak valid",
+  });
+}
 
     const existingShortLink = await prisma.shortLink.findFirst({
       where: {

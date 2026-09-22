@@ -32,20 +32,21 @@ export const authMiddleware = (
 
     const decoded = jwt.verify(token, jwtSecret);
 
-if (
-  typeof decoded === "string" ||
-  typeof decoded.userId !== "string" ||
-  typeof decoded.email !== "string"
-) {
-  return res.status(401).json({
-    message: "Token tidak valid",
-  });
-}
+    if (
+      typeof decoded === "string" ||
+      typeof decoded.userId !== "string" ||
+      typeof decoded.email !== "string"
+    ) {
+      return res.status(401).json({
+        message: "Token tidak valid",
+      });
+    }
 
-req.user = {
-  userId: decoded.userId,
-  email: decoded.email,
-};
+    req.user = {
+      userId: decoded.userId,
+      email: decoded.email,
+    };
+
     next();
   } catch (error) {
     console.error(error);

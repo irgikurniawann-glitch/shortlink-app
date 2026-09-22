@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function GoogleCallbackPage() {
+function GoogleCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -15,10 +15,16 @@ export default function GoogleCallbackPage() {
       return;
     }
 
-    localStorage.setItem("token", token);
-
-    router.replace("/dashboard");
+    localStorage.setItem("token", token); router.replace("/dashboard");
   }, [router, searchParams]);
 
   return <p>Memproses login Google...</p>;
+}
+
+export default function GoogleCallbackPage() {
+  return (
+    <Suspense fallback={<p>Memproses login Google...</p>}>
+      <GoogleCallbackContent />
+    </Suspense>
+  );
 }

@@ -1,30 +1,49 @@
 import { Request, Response } from "express";
 import { google } from "googleapis";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import { prisma } from "../lib/prisma.js";
 
 const clientId = process.env.GOOGLE_CLIENT_ID;
 const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+const redirectUri = process.env.GOOGLE_REDIRECT_URI;
 
-if (!clientId || !clientSecret) {
-  throw new Error("GOOGLE_CLIENT_ID atau GOOGLE_CLIENT_SECRET belum diatur");
+if (!clientId || !clientSecret || !redirectUri) {
+  throw new Error(
+    "GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, atau GOOGLE_REDIRECT_URI belum diatur"
+  );
 }
 
-export const googleOAuth2Client = new google.auth.OAuth2(
-  clientId,
-  clientSecret,
-  "http://localhost:4000/api/auth/google/callback"
-);
+const createGoogleOAuth2Client = () => {
+  return new google.auth.OAuth2(
+    clientId,
+    clientSecret,
+    redirectUri
+  );
+};
 
 export const getGoogleAuthorizationUrl = () => {
-  return googleOAuth2Client.generateAuthUrl({
+  const jwtSecret = process.env.JWT_SECRET;
+
+  if (!jwtSecret) {
+    throw new Error("JWT_SECRET belum diatur");
+  }
+
+  const nonce = crypto.randomBytes(32).toString("hex");
+
+  const state = jwt.sign(
+    { nonce },
+    jwtSecret,
+    { expiresIn: "10m" }
+  );
+
+  const oauth2Client = createGoogleOAuth2Client();
+
+  return oauth2Client.generateAuthUrl({
     access_type: "offline",
-    scope: [
-      "openid",
-      "email",
-      "profile",
-    ],
+    scope: ["openid", "email", "profile"],
     prompt: "select_account",
+    state,
   });
 };
 
@@ -33,7 +52,7 @@ export const handleGoogleCallback = async (
   res: Response
 ) => {
   try {
-    const { code } = req.query;
+    const { code, state } = req.query;
 
     if (!code || typeof code !== "string") {
       return res.status(400).json({
@@ -41,12 +60,34 @@ export const handleGoogleCallback = async (
       });
     }
 
-    const { tokens } = await googleOAuth2Client.getToken(code);
+    if (!state || typeof state !== "string") {
+      return res.status(400).json({
+        message: "State Google tidak ditemukan",
+      });
+    }
 
-    googleOAuth2Client.setCredentials(tokens);
+    const jwtSecret = process.env.JWT_SECRET;
+
+    if (!jwtSecret) {
+      throw new Error("JWT_SECRET belum diatur");
+    }
+
+    try {
+      jwt.verify(state, jwtSecret);
+    } catch {
+      return res.status(400).json({
+        message: "State Google tidak valid atau sudah kedaluwarsa",
+      });
+    }
+
+    const oauth2Client = createGoogleOAuth2Client();
+
+    const { tokens } = await oauth2Client.getToken(code);
+
+    oauth2Client.setCredentials(tokens);
 
     const oauth2 = google.oauth2({
-      auth: googleOAuth2Client,
+      auth: oauth2Client,
       version: "v2",
     });
 
@@ -63,12 +104,12 @@ export const handleGoogleCallback = async (
         message: "Email Google belum terverifikasi",
       });
     }
-    
+
     if (!googleUser.id) {
-  return res.status(400).json({
-    message: "ID Google tidak ditemukan",
-  });
-}
+      return res.status(400).json({
+        message: "ID Google tidak ditemukan",
+      });
+    }
 
     let user = await prisma.user.findUnique({
       where: {
@@ -103,12 +144,6 @@ export const handleGoogleCallback = async (
           emailVerified: true,
         },
       });
-    }
-
-    const jwtSecret = process.env.JWT_SECRET;
-
-    if (!jwtSecret) {
-      throw new Error("JWT_SECRET belum diatur");
     }
 
     const token = jwt.sign(

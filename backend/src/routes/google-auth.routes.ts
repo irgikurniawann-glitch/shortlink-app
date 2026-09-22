@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { authRateLimit } from "../middleware/rate-limit.middleware.js";
 import {
   getGoogleAuthorizationUrl,
   handleGoogleCallback,
@@ -6,7 +7,7 @@ import {
 
 const router = Router();
 
-router.get("/google", (req, res) => {
+router.get("/google", authRateLimit, (req, res) => {
   const authorizationUrl = getGoogleAuthorizationUrl();
 
   return res.redirect(authorizationUrl);

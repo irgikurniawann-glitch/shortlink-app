@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth.middleware.js";
+import { authRateLimit } from "../middleware/rate-limit.middleware.js";
 import {
   register,
   login,
@@ -19,8 +20,12 @@ router.post("/", authMiddleware, createShortLink);
 router.put("/:code", authMiddleware, updateShortLink);
 router.delete("/:code", authMiddleware, deleteShortLink);
 router.get("/", authMiddleware, getShortLinks);
-router.get("/verify-email", verifyEmail);
+
+router.get("/verify-email", authRateLimit, verifyEmail);
+
 router.get("/:code", redirectShortLink);
-router.post("/register", register);
-router.post("/login", login);
+
+router.post("/register", authRateLimit, register);
+router.post("/login", authRateLimit, login);
+
 export default router;
