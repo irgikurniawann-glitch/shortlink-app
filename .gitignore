@@ -12,3 +12,5 @@ backend/skills-lock.json
 
 frontend/AGENTS.md
 frontend/CLAUDE.md
+.vercel
+.env*
