@@ -8,7 +8,7 @@ export const sendVerificationEmail = async (
 ) => {
   const { data, error } = await resend.emails.send({
     from: "Shortlink <onboarding@resend.dev>",
-    to: email,
+    to: "irgikurniawann@gmail.com",
     subject: "Verifikasi Email Shortlink",
     html: `
       <div>
