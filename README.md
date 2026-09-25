@@ -17,6 +17,8 @@ A full-stack URL shortener application built from scratch with Next.js, Node.js,
 - Edit and delete short links
 - QR code generation
 - Responsive dashboard
+- Forgot password
+- Reset password
 
 
 # Shortlink
