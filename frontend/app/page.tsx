@@ -20,40 +20,70 @@ const FEATURES = [
 
 export default function HomePage() {
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
-      {/* Background Decorator - Gradient Mesh & Glow ala Bitly (dengan nuansa Indigo & Purple) */}
-      <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[600px] w-full max-w-7xl -translate-x-1/2 overflow-hidden blur-3xl opacity-30">
-        <div className="absolute top-[-100px] left-1/4 h-[400px] w-[400px] rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600"></div>
-        <div className="absolute top-[100px] right-1/4 h-[350px] w-[350px] rounded-full bg-gradient-to-br from-blue-600 to-indigo-800"></div>
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-[#0a0c08] text-[#E8E9E3] selection:bg-[#D2FF00] selection:text-black font-['Space_Grotesk']">
+      {/* === BG LANDO NORRIS VIBES - HIGH OCTANE & GLOW === */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        {/* Base Background */}
+        <div className="absolute inset-0 bg-[#0a0c08]" />
+
+        {/* Dynamic Glowing Blobs */}
+        <div className="absolute -top-40 -left-40 h-[600px] w-[600px] rounded-full bg-[#D2FF00]/15 blur-[140px] animate-[blobMove_8s_ease-in-out_infinite_alternate]" />
+        <div className="absolute top-1/2 -right-40 h-[500px] w-[500px] rounded-full bg-[#00F0FF]/10 blur-[130px] animate-[blobMove_10s_ease-in-out_infinite_alternate-reverse]" />
+        <div className="absolute -bottom-40 left-1/3 h-[600px] w-[600px] rounded-full bg-[#D2FF00]/10 blur-[150px] animate-[blobMove_12s_ease-in-out_infinite_alternate]" />
+
+        {/* Tech Grid Pattern overlay */}
+        <div 
+          className="absolute inset-0 opacity-[0.05]" 
+          style={{
+            backgroundImage: `radial-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px)`,
+            backgroundSize: '32px 32px'
+          }}
+        />
+
+        {/* Noise Grain overlay */}
+        <div className="absolute inset-0 opacity-[0.07] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
+
+        {/* Vignette Accent */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(10,12,8,0.85)_100%)]" />
       </div>
 
-      {/* Grid Pattern Background */}
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@400;500;700&display=swap');
+        
+        @keyframes blobMove {
+          0% { transform: scale(1) translate(0, 0) rotate(0deg); }
+          50% { transform: scale(1.15) translate(-3%, 4%) rotate(3deg); }
+          100% { transform: scale(1.25) translate(4%, -3%) rotate(-3deg); }
+        }
 
-      {/* Header / Navigasi */}
-      <header className="sticky top-0 z-20 border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-md">
-        <nav
-          className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6"
-          aria-label="Navigasi Utama"
-        >
-          <Link
-            href="/"
-            className="text-xl font-black tracking-tight text-white transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-md"
-          >
-            Shortlink<span className="text-indigo-500">.</span>
+        .text-glow-hover {
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .text-glow-hover:hover {
+          text-shadow: 0 0 25px rgba(210, 255, 0, 0.75), 0 0 40px rgba(210, 255, 0, 0.4);
+        }
+
+        .text-glow-cyan:hover {
+          text-shadow: 0 0 25px rgba(0, 240, 255, 0.75), 0 0 40px rgba(0, 240, 255, 0.4);
+        }
+      `}</style>
+
+      {/* Header - Minimalist Bold F1 Style */}
+      <header className="sticky top-0 z-20 border-b border-white/[0.06] bg-[#0a0c08]/70 backdrop-blur-2xl">
+        <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+          <Link href="/" className="group font-['Syne'] text-[22px] font-extrabold tracking-tight text-white">
+            SHORTLINK<span className="text-[#D2FF00] inline-block transition-transform duration-300 group-hover:scale-150 group-hover:drop-shadow-[0_0_10px_#D2FF00]">.</span>
           </Link>
-
           <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="rounded-xl px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-900 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+            <Link 
+              href="/login" 
+              className="rounded-full px-5 py-2.5 text-[12px] font-bold tracking-[0.15em] uppercase text-white/70 hover:text-white transition duration-300 hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]"
             >
               Masuk
             </Link>
-
-            <Link
-              href="/register"
-              className="rounded-xl bg-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 active:scale-95"
+            <Link 
+              href="/register" 
+              className="relative group overflow-hidden rounded-full bg-[#D2FF00] px-6 py-2.5 text-[12px] font-bold tracking-[0.15em] uppercase text-black transition-all duration-300 hover:bg-[#e3ff4f] active:scale-95 shadow-[0_0_25px_rgba(210,255,0,0.4)] hover:shadow-[0_0_35px_rgba(210,255,0,0.7)]"
             >
               Daftar
             </Link>
@@ -61,63 +91,72 @@ export default function HomePage() {
         </nav>
       </header>
 
-      {/* Konten Utama */}
       <main className="flex-1">
-        <section className="mx-auto max-w-6xl px-4 pb-24 pt-16 sm:px-6 sm:pb-32 sm:pt-24">
-          {/* Hero Section */}
+        <section className="mx-auto max-w-6xl px-6 pb-24 pt-20 sm:pt-32">
+          {/* Hero Content */}
           <div className="mx-auto max-w-3xl text-center">
-            {/* Badge Highlight */}
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-4 py-1.5 text-xs font-semibold text-indigo-300 backdrop-blur-sm">
-              <span className="flex h-2 w-2 rounded-full bg-indigo-400 animate-pulse" />
-              Platform Pemendek Link Modern
+            {/* Badge */}
+            <div className="mb-8 inline-flex items-center gap-2.5 rounded-full border border-[#D2FF00]/30 bg-[#D2FF00]/10 px-5 py-2 backdrop-blur-xl shadow-[0_0_20px_rgba(210,255,0,0.15)] transition-transform duration-300 hover:scale-105">
+              <span className="h-2 w-2 animate-ping rounded-full bg-[#D2FF00]" />
+              <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#D2FF00]">
+                Platform Pemendek Link Modern
+              </span>
             </div>
 
-            <h1 className="text-4xl font-black tracking-tight text-white sm:text-6xl sm:leading-tight">
-              Satu Link Singkat untuk{" "}
-              <span className="bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">
-                Semua Kebutuhan Anda
+            {/* Main Interactive Hover Glow Title */}
+            <h1 className="font-['Syne'] text-[46px] font-[800] leading-[0.92] tracking-[-0.04em] text-white sm:text-[76px] cursor-default select-none">
+              <span className="inline-block transition-all duration-300 hover:scale-[1.02] hover:text-[#ffffff] text-glow-hover">
+                SATU LINK
+              </span>
+              <br />
+              <span className="text-[#D2FF00] inline-block transition-all duration-300 hover:scale-[1.03] text-glow-hover">
+                SINGKAT
+              </span>{" "}
+              <span className="inline-block transition-all duration-300 hover:scale-[1.02] hover:text-cyan-300 text-glow-cyan">
+                UNTUK SEMUA.
               </span>
             </h1>
 
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-400 sm:text-lg">
+            {/* Subtitle with subtle glow on hover */}
+            <p className="mx-auto mt-8 max-w-xl text-[15px] leading-[1.8] text-white/60 transition-colors duration-300 hover:text-white/90">
               Perpendek URL panjang, buat link kustom yang mudah diingat, dan lacak performa klik dengan analitik real-time dalam satu platform.
             </p>
 
-            <div className="mt-10 flex flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center">
-              <Link
-                href="/register"
-                className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-7 py-4 text-base font-semibold text-white shadow-xl shadow-indigo-600/25 transition hover:bg-indigo-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 active:scale-95"
+            {/* CTA Buttons */}
+            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Link 
+                href="/register" 
+                className="group relative inline-flex w-full sm:w-auto items-center justify-center rounded-full bg-white px-8 py-4 text-[12px] font-bold tracking-[0.15em] uppercase text-black transition-all duration-300 hover:bg-[#D2FF00] active:scale-95 hover:shadow-[0_0_30px_rgba(210,255,0,0.5)]"
               >
                 Mulai Gratis Sekarang
+                <span className="ml-2 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1">↗</span>
               </Link>
-
-              <Link
-                href="/login"
-                className="inline-flex items-center justify-center rounded-xl border border-slate-800 bg-slate-900/80 px-7 py-4 text-base font-semibold text-slate-300 shadow-sm backdrop-blur-sm transition hover:border-slate-700 hover:bg-slate-900 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 active:scale-95"
+              <Link 
+                href="/login" 
+                className="inline-flex w-full sm:w-auto items-center justify-center rounded-full border border-white/15 bg-white/[0.03] px-8 py-4 text-[12px] font-bold tracking-[0.15em] uppercase text-white/80 backdrop-blur-xl transition-all duration-300 hover:bg-white/[0.1] hover:text-white hover:border-white/30 hover:shadow-[0_0_20px_rgba(255,255,255,0.15)]"
               >
                 Masuk ke Akun
               </Link>
             </div>
           </div>
 
-          {/* Card Fitur (Glassmorphism & Border Gradient Style ala Bitly) */}
-          <div className="mx-auto mt-20 grid max-w-5xl gap-6 sm:grid-cols-3 sm:mt-28">
+          {/* Features Cards with Glassmorphism + Neon Border Hover */}
+          <div className="mx-auto mt-24 grid max-w-5xl gap-6 sm:mt-32 sm:grid-cols-3">
             {FEATURES.map((feature, index) => (
               <article
                 key={index}
-                className="group relative rounded-2xl border border-slate-800/80 bg-slate-900/50 p-7 backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-indigo-500/40 hover:bg-slate-900/80 hover:shadow-2xl hover:shadow-indigo-500/10"
+                className="group relative rounded-[28px] border border-white/[0.08] bg-white/[0.02] p-8 backdrop-blur-2xl transition-all duration-500 hover:-translate-y-2 hover:border-[#D2FF00]/40 hover:bg-white/[0.05] hover:shadow-[0_10px_40px_-10px_rgba(210,255,0,0.15)]"
               >
-                <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10 text-2xl border border-indigo-500/20 group-hover:scale-110 transition-transform">
+                <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-2xl group-hover:bg-[#D2FF00] group-hover:text-black group-hover:border-[#D2FF00] group-hover:shadow-[0_0_20px_rgba(210,255,0,0.5)] transition-all duration-300">
                   {feature.icon}
                 </div>
-
-                <h2 className="text-lg font-bold text-white">
+                <h2 className="font-['Syne'] text-[20px] font-bold leading-tight text-white transition-colors duration-300 group-hover:text-[#D2FF00]">
                   {feature.title}
                 </h2>
-
-                <p className="mt-3 text-sm leading-relaxed text-slate-400">
+                <p className="mt-3 text-[13px] leading-[1.7] text-white/50 group-hover:text-white/80 transition-colors duration-300">
                   {feature.description}
                 </p>
+                <div className="absolute bottom-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-[#D2FF00]/0 to-transparent group-hover:via-[#D2FF00]/60 transition-all duration-500" />
               </article>
             ))}
           </div>
@@ -125,10 +164,13 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800/80 bg-slate-950 py-8">
-        <div className="mx-auto max-w-6xl px-4 text-center sm:px-6">
-          <p className="text-xs font-medium text-slate-500">
+      <footer className="border-t border-white/[0.06] bg-[#0a0c08]/80 py-8 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-6xl flex-col sm:flex-row items-center justify-between gap-4 px-6">
+          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/40 hover:text-white/70 transition-colors">
             Simple • Fast • Powerful Analytics
+          </p>
+          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/40 hover:text-white/70 transition-colors">
+            © 2026 Shortlink — Built by Irgi
           </p>
         </div>
       </footer>

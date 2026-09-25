@@ -52,31 +52,65 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-950 px-4 py-12 text-slate-100">
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[500px] w-full max-w-4xl -translate-x-1/2 -translate-y-1/2 overflow-hidden blur-3xl opacity-25">
-        <div className="absolute left-1/3 top-0 h-[300px] w-[300px] rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600" />
-        <div className="absolute bottom-0 right-1/3 h-[250px] w-[250px] rounded-full bg-gradient-to-br from-blue-600 to-indigo-800" />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0a0c08] px-4 py-12 text-[#E8E9E3] selection:bg-[#D2FF00] selection:text-black font-['Space_Grotesk']">
+      {/* Dynamic Background Decorator */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute inset-0 bg-[#0a0c08]" />
+
+        {/* Dynamic Glowing Blobs */}
+        <div className="absolute top-1/4 -left-20 h-[500px] w-[500px] rounded-full bg-[#D2FF00]/10 blur-[150px] animate-[blobMove_10s_ease-in-out_infinite_alternate]" />
+        <div className="absolute bottom-1/4 -right-20 h-[450px] w-[450px] rounded-full bg-[#00F0FF]/10 blur-[140px] animate-[blobMove_8s_ease-in-out_infinite_alternate-reverse]" />
+
+        {/* Tech Grid Pattern */}
+        <div 
+          className="absolute inset-0 opacity-[0.05]" 
+          style={{
+            backgroundImage: `radial-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px)`,
+            backgroundSize: '32px 32px'
+          }}
+        />
+
+        {/* Grain Overlay */}
+        <div className="absolute inset-0 opacity-[0.07] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
+
+        {/* Vignette */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(10,12,8,0.85)_100%)]" />
       </div>
 
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@400;500;700&display=swap');
+
+        @keyframes blobMove {
+          0% { transform: scale(1) translate(0, 0) rotate(0deg); }
+          50% { transform: scale(1.15) translate(3%, 4%) rotate(3deg); }
+          100% { transform: scale(1.25) translate(-4%, -3%) rotate(-3deg); }
+        }
+
+        .text-glow-hover {
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .text-glow-hover:hover {
+          text-shadow: 0 0 25px rgba(210, 255, 0, 0.75), 0 0 40px rgba(210, 255, 0, 0.4);
+        }
+      `}</style>
 
       <main className="w-full max-w-md">
-        <div className="rounded-2xl border border-slate-800/80 bg-slate-900/60 p-8 shadow-2xl backdrop-blur-md">
+        <div className="group relative rounded-[28px] border border-white/[0.08] bg-white/[0.02] p-8 backdrop-blur-2xl transition-all duration-500 hover:border-[#D2FF00]/30 hover:bg-white/[0.03] shadow-[0_20px_50px_rgba(0,0,0,0.6)] sm:p-10">
+          
           <div className="mb-8 text-center">
             <Link
               href="/"
-              className="mb-2 inline-block rounded-md text-2xl font-black tracking-tight text-white transition hover:opacity-90"
+              className="group/logo inline-block font-['Syne'] text-2xl font-extrabold tracking-tight text-white focus-visible:outline-none mb-3"
             >
-              Shortlink<span className="text-indigo-500">.</span>
+              SHORTLINK<span className="text-[#D2FF00] inline-block transition-transform duration-300 group-hover/logo:scale-150 group-hover/logo:drop-shadow-[0_0_10px_#D2FF00]">.</span>
             </Link>
 
-            <h1 className="text-xl font-bold tracking-tight text-white">
+            <h1 className="font-['Syne'] text-xl font-bold tracking-tight text-white cursor-default select-none transition-all duration-300 hover:scale-[1.01] text-glow-hover sm:text-2xl">
               Lupa Password?
             </h1>
 
-            <p className="mt-2 text-sm leading-6 text-slate-400">
-              Masukkan email akun kamu. Jika email terdaftar,
-              kami akan mengirimkan link untuk membuat password baru.
+            <p className="mt-2 text-xs leading-relaxed text-white/50">
+              Masukkan email akun kamu. Jika email terdaftar, kami akan mengirimkan link untuk membuat password baru.
             </p>
           </div>
 
@@ -84,7 +118,7 @@ export default function ForgotPasswordPage() {
             <div>
               <label
                 htmlFor="email"
-                className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-300"
+                className="block text-[10px] font-bold tracking-[0.15em] uppercase text-white/60 mb-2"
               >
                 Email
               </label>
@@ -96,17 +130,17 @@ export default function ForgotPasswordPage() {
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="nama@email.com"
                 required
-                className="w-full rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3.5 text-sm text-white placeholder-white/20 backdrop-blur-xl transition duration-300 focus:border-[#D2FF00] focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-[#D2FF00] focus:shadow-[0_0_15px_rgba(210,255,0,0.2)]"
               />
             </div>
 
             {message && (
               <div
                 role="alert"
-                className={`rounded-xl border p-3.5 text-center text-sm font-medium ${
+                className={`rounded-2xl border p-3.5 text-center text-xs font-semibold backdrop-blur-xl transition-all duration-300 ${
                   isError
-                    ? "border-rose-500/20 bg-rose-500/10 text-rose-300"
-                    : "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
+                    ? "border-rose-500/20 bg-rose-500/10 text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.1)]"
+                    : "border-[#D2FF00]/30 bg-[#D2FF00]/10 text-[#D2FF00] shadow-[0_0_15px_rgba(210,255,0,0.1)]"
                 }`}
               >
                 {message}
@@ -116,17 +150,17 @@ export default function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl bg-indigo-600 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-full bg-[#D2FF00] py-4 text-[12px] font-bold tracking-[0.15em] uppercase text-black shadow-[0_0_20px_rgba(210,255,0,0.3)] transition-all duration-300 hover:bg-[#e0ff4d] hover:shadow-[0_0_30px_rgba(210,255,0,0.6)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Mengirim..." : "Kirim Link Reset"}
             </button>
           </form>
 
-          <p className="mt-8 text-center text-sm text-slate-400">
+          <p className="mt-8 text-center text-xs text-white/40">
             Ingat password kamu?{" "}
             <Link
               href="/login"
-              className="font-medium text-indigo-400 transition hover:text-indigo-300 hover:underline"
+              className="font-bold text-[#D2FF00] transition-all duration-300 hover:underline hover:drop-shadow-[0_0_10px_rgba(210,255,0,0.5)]"
             >
               Kembali ke Login
             </Link>
