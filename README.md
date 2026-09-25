@@ -2,7 +2,7 @@
 
 A full-stack URL shortener application built from scratch with Next.js, Node.js, Express, PostgreSQL, and Prisma.
 
-## ✨ Features
+## Features
 
 - Create short links
 - Custom short-link codes
@@ -18,7 +18,14 @@ A full-stack URL shortener application built from scratch with Next.js, Node.js,
 - QR code generation
 - Responsive dashboard
 
-## 🛠️ Tech Stack
+
+# Shortlink
+
+Aplikasi URL Shortener untuk membuat dan mengelola short link.
+
+## Live Demo
+
+[Shortlink App](https://shortlink-app-green.vercel.app)
 
 ### Frontend
 - Next.js
@@ -43,7 +50,8 @@ A full-stack URL shortener application built from scratch with Next.js, Node.js,
 - Vercel
 - GitHub
 
-## 🏗️ Project Structure
+
+## Project Structure
 
 ```text
 shortlink-app/
