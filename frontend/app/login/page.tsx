@@ -25,7 +25,7 @@ export default function LoginPage() {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/shortlinks/login`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
         {
           method: "POST",
           headers: {
@@ -130,6 +130,9 @@ if (result.data?.token) {
                 className="w-full rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
               />
             </div>
+            <p>
+  <a href="/forgot-password">Lupa password?</a>
+</p>
 
             {message && (
               <div

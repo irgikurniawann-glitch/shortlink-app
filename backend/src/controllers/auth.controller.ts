@@ -3,7 +3,10 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { prisma } from "../lib/prisma.js";
 import crypto from "crypto";
-import { sendVerificationEmail } from "../services/email.service.js";
+import {
+  sendVerificationEmail,
+  sendPasswordResetEmail,
+} from "../services/email.service.js";
 
 export const register = async (
   req: Request,
@@ -211,6 +214,152 @@ const passwordMatch = await bcrypt.compare(
 
     return res.status(500).json({
       message: "Gagal melakukan login",
+    });
+  }
+};
+
+export const forgotPassword = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        message: "Email wajib diisi",
+      });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    // Jangan membocorkan apakah email terdaftar atau tidak.
+    if (!user) {
+      return res.json({
+        message:
+          "Jika email terdaftar, link reset password akan dikirim.",
+      });
+    }
+
+    // Hapus token reset sebelumnya.
+    await prisma.passwordResetToken.deleteMany({
+      where: {
+        userId: user.id,
+      },
+    });
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    await prisma.passwordResetToken.create({
+      data: {
+        token: resetToken,
+        userId: user.id,
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+      },
+    });
+
+    const frontendUrl = process.env.FRONTEND_URL;
+
+    if (!frontendUrl) {
+      throw new Error("FRONTEND_URL belum diatur");
+    }
+
+    const resetUrl =
+      `${frontendUrl}/reset-password?token=${resetToken}`;
+
+    await sendPasswordResetEmail(
+      user.email,
+      resetUrl
+    );
+
+    return res.json({
+      message:
+        "Jika email terdaftar, link reset password akan dikirim.",
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Gagal memproses forgot password",
+    });
+  }
+};
+
+export const resetPassword = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({
+        message: "Token dan password wajib diisi",
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        message: "Password minimal 6 karakter",
+      });
+    }
+
+    const resetToken =
+      await prisma.passwordResetToken.findUnique({
+        where: {
+          token,
+        },
+      });
+
+    if (!resetToken) {
+      return res.status(400).json({
+        message: "Token reset password tidak valid",
+      });
+    }
+
+    if (resetToken.expiresAt < new Date()) {
+      await prisma.passwordResetToken.delete({
+        where: {
+          id: resetToken.id,
+        },
+      });
+
+      return res.status(400).json({
+        message: "Token reset password sudah kedaluwarsa",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(
+      password,
+      10
+    );
+
+    await prisma.user.update({
+      where: {
+        id: resetToken.userId,
+      },
+      data: {
+        password: hashedPassword,
+      },
+    });
+
+    // Token hanya bisa dipakai sekali.
+    await prisma.passwordResetToken.delete({
+      where: {
+        id: resetToken.id,
+      },
+    });
+
+    return res.json({
+      message: "Password berhasil diubah",
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Gagal melakukan reset password",
     });
   }
 };
