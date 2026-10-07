@@ -69,7 +69,6 @@ export default function RegisterPage() {
       setPassword("");
       setConfirmPassword("");
 
-      // Beri waktu agar user bisa membaca pesan sukses
       setTimeout(() => {
         router.push("/login");
       }, 3000);
@@ -84,76 +83,34 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0a0c08] px-4 py-12 text-[#E8E9E3] selection:bg-[#D2FF00] selection:text-black font-['Space_Grotesk']">
-      {/* Dynamic Background Decorator */}
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-[#0a0c08]" />
-
-        {/* Dynamic Glowing Blobs */}
-        <div className="absolute top-1/4 -right-20 h-[500px] w-[500px] rounded-full bg-[#D2FF00]/10 blur-[150px] animate-[blobMove_10s_ease-in-out_infinite_alternate]" />
-        <div className="absolute bottom-1/4 -left-20 h-[450px] w-[450px] rounded-full bg-[#00F0FF]/10 blur-[140px] animate-[blobMove_8s_ease-in-out_infinite_alternate-reverse]" />
-
-        {/* Tech Grid Pattern */}
-        <div 
-          className="absolute inset-0 opacity-[0.05]" 
-          style={{
-            backgroundImage: `radial-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px)`,
-            backgroundSize: '32px 32px'
-          }}
-        />
-
-        {/* Grain Overlay */}
-        <div className="absolute inset-0 opacity-[0.07] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
-
-        {/* Vignette */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(10,12,8,0.85)_100%)]" />
-      </div>
-
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@400;500;700&display=swap');
-
-        @keyframes blobMove {
-          0% { transform: scale(1) translate(0, 0) rotate(0deg); }
-          50% { transform: scale(1.15) translate(-3%, 4%) rotate(3deg); }
-          100% { transform: scale(1.25) translate(4%, -3%) rotate(-3deg); }
-        }
-
-        .text-glow-hover {
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .text-glow-hover:hover {
-          text-shadow: 0 0 25px rgba(210, 255, 0, 0.75), 0 0 40px rgba(210, 255, 0, 0.4);
-        }
-      `}</style>
-
-      <main className="w-full max-w-md">
-        <div className="group relative rounded-[28px] border border-white/[0.08] bg-white/[0.02] p-8 backdrop-blur-2xl transition-all duration-500 hover:border-[#D2FF00]/30 hover:bg-white/[0.03] shadow-[0_20px_50px_rgba(0,0,0,0.6)] sm:p-10">
-          
-          {/* Header */}
+    <div className="min-h-screen bg-[#F0FFFF] px-6 py-12 text-[#1F2022]">
+      <main className="mx-auto flex min-h-[calc(100vh-6rem)] max-w-md items-center justify-center">
+        <div className="w-full rounded-md border border-[#E7E5E0] bg-white p-8 shadow-sm sm:p-10">
+          {/* Brand & Header */}
           <div className="mb-8 text-center">
             <Link
               href="/"
-              className="group/logo inline-block font-['Syne'] text-2xl font-extrabold tracking-tight text-white focus-visible:outline-none mb-3"
+              className="font-serif text-2xl font-medium tracking-tight text-[#008B8B]"
             >
-              SHORTLINK<span className="text-[#D2FF00] inline-block transition-transform duration-300 group-hover/logo:scale-150 group-hover/logo:drop-shadow-[0_0_10px_#D2FF00]">.</span>
+              ShortLink
             </Link>
 
-            <h1 className="font-['Syne'] text-xl font-bold tracking-tight text-white cursor-default select-none transition-all duration-300 hover:scale-[1.01] text-glow-hover sm:text-2xl">
+            <h1 className="mt-8 font-serif text-3xl font-normal tracking-tight text-[#1F2022]">
               Buat Akun Baru
             </h1>
 
-            <p className="mt-2 text-xs leading-relaxed text-white/50">
+            <p className="font-sans mt-3 text-sm leading-relaxed text-[#55575A]">
               Daftar untuk mulai membuat dan mengelola short link kamu.
             </p>
           </div>
 
-          {/* Form */}
+          {/* Register Form */}
           <form onSubmit={handleRegister} className="space-y-5">
             {/* Email */}
             <div>
               <label
                 htmlFor="email"
-                className="block text-[10px] font-bold tracking-[0.15em] uppercase text-white/60 mb-2"
+                className="font-sans mb-2 block text-sm font-medium text-[#55575A]"
               >
                 Email
               </label>
@@ -166,7 +123,7 @@ export default function RegisterPage() {
                 placeholder="nama@email.com"
                 required
                 autoComplete="email"
-                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3.5 text-sm text-white placeholder-white/20 backdrop-blur-xl transition duration-300 focus:border-[#D2FF00] focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-[#D2FF00] focus:shadow-[0_0_15px_rgba(210,255,0,0.2)]"
+                className="font-sans w-full rounded border border-[#D9D6D0] bg-[#FAF8F5] px-4 py-3 text-sm text-[#1F2022] placeholder:text-[#A3A3A3] outline-none transition focus:border-[#008B8B] focus:ring-1 focus:ring-[#008B8B]/20"
               />
             </div>
 
@@ -174,7 +131,7 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-[10px] font-bold tracking-[0.15em] uppercase text-white/60 mb-2"
+                className="font-sans mb-2 block text-sm font-medium text-[#55575A]"
               >
                 Password
               </label>
@@ -188,7 +145,7 @@ export default function RegisterPage() {
                 required
                 minLength={6}
                 autoComplete="new-password"
-                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3.5 text-sm text-white placeholder-white/20 backdrop-blur-xl transition duration-300 focus:border-[#D2FF00] focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-[#D2FF00] focus:shadow-[0_0_15px_rgba(210,255,0,0.2)]"
+                className="font-sans w-full rounded border border-[#D9D6D0] bg-[#FAF8F5] px-4 py-3 text-sm text-[#1F2022] placeholder:text-[#A3A3A3] outline-none transition focus:border-[#008B8B] focus:ring-1 focus:ring-[#008B8B]/20"
               />
             </div>
 
@@ -196,7 +153,7 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="confirmPassword"
-                className="block text-[10px] font-bold tracking-[0.15em] uppercase text-white/60 mb-2"
+                className="font-sans mb-2 block text-sm font-medium text-[#55575A]"
               >
                 Konfirmasi Password
               </label>
@@ -208,44 +165,44 @@ export default function RegisterPage() {
                 onChange={(event) =>
                   setConfirmPassword(event.target.value)
                 }
-                placeholder="Ulangi password kamu"
+                placeholder="Ulangi password"
                 required
                 minLength={6}
                 autoComplete="new-password"
-                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3.5 text-sm text-white placeholder-white/20 backdrop-blur-xl transition duration-300 focus:border-[#D2FF00] focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-[#D2FF00] focus:shadow-[0_0_15px_rgba(210,255,0,0.2)]"
+                className="font-sans w-full rounded border border-[#D9D6D0] bg-[#FAF8F5] px-4 py-3 text-sm text-[#1F2022] placeholder:text-[#A3A3A3] outline-none transition focus:border-[#008B8B] focus:ring-1 focus:ring-[#008B8B]/20"
               />
             </div>
 
-            {/* Message Alert */}
+            {/* Message */}
             {message && (
               <div
                 role="alert"
-                className={`rounded-2xl border p-3.5 text-center text-xs font-semibold backdrop-blur-xl transition-all duration-300 ${
+                className={`rounded border px-4 py-3 text-sm ${
                   isError
-                    ? "border-rose-500/20 bg-rose-500/10 text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.1)]"
-                    : "border-[#D2FF00]/30 bg-[#D2FF00]/10 text-[#D2FF00] shadow-[0_0_15px_rgba(210,255,0,0.1)]"
+                    ? "border-[#E7B8AE] bg-[#FFF4F1] text-[#BA5C44]"
+                    : "border-[#B8D6D3] bg-[#F0FAF9] text-[#008B8B]"
                 }`}
               >
                 {message}
               </div>
             )}
 
-            {/* Submit Button */}
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-full bg-[#D2FF00] py-4 text-[12px] font-bold tracking-[0.15em] uppercase text-black shadow-[0_0_20px_rgba(210,255,0,0.3)] transition-all duration-300 hover:bg-[#e0ff4d] hover:shadow-[0_0_30px_rgba(210,255,0,0.6)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="font-sans w-full rounded bg-[#008B8B] px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-[#006F6F] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? "Membuat Akun..." : "Daftar Sekarang"}
             </button>
           </form>
 
-          {/* Link to Login */}
-          <p className="mt-8 text-center text-xs text-white/40">
+          {/* Login */}
+          <p className="font-sans mt-8 text-center text-sm text-[#55575A]">
             Sudah punya akun?{" "}
             <Link
               href="/login"
-              className="font-bold text-[#D2FF00] transition-all duration-300 hover:underline hover:drop-shadow-[0_0_10px_rgba(210,255,0,0.5)]"
+              className="font-sans font-medium text-[#008B8B] transition-colors hover:text-[#006F6F] hover:underline"
             >
               Masuk sekarang
             </Link>

@@ -1,179 +1,502 @@
-import Link from "next/link";
+"use client";
 
-const FEATURES = [
-  {
-    icon: "⚡",
-    title: "Link Singkat & Cepat",
-    description: "Ubah URL panjang menjadi link pendek yang rapi dan siap dibagikan dalam hitungan detik.",
-  },
-  {
-    icon: "🎯",
-    title: "Custom Domain & Link",
-    description: "Sesuaikan nama belakang link agar terlihat profesional dan terpercaya bagi audiens Anda.",
-  },
-  {
-    icon: "📈",
-    title: "Analitik Real-time",
-    description: "Pantau setiap klik, lokasi pengunjung, dan perangkat yang digunakan secara mendalam.",
-  },
-] as const;
+import Link from "next/link";
+import { FormEvent, useState } from "react";
+
+type ShortlinkResult = {
+  shortUrl: string;
+  originalUrl: string;
+};
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function HomePage() {
+  const [url, setUrl] = useState("");
+  const [result, setResult] = useState<ShortlinkResult | null>(null);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleShorten = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    setMessage("");
+    setResult(null);
+    setCopied(false);
+
+    const trimmedUrl = url.trim();
+
+    if (!trimmedUrl) {
+      setMessage("Masukkan URL terlebih dahulu.");
+      return;
+    }
+
+    try {
+      new URL(trimmedUrl);
+    } catch {
+      setMessage("Masukkan URL yang valid.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${API_URL}/api/shortlinks`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url: trimmedUrl,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setMessage(
+          data.message || "Gagal membuat short link."
+        );
+        return;
+      }
+
+      /*
+       * Backend project kamu mungkin mengembalikan
+       * shortUrl / shortLink / shortCode.
+       *
+       * Kita coba beberapa bentuk response supaya
+       * UI tidak mudah rusak.
+       */
+      let shortUrl = "";
+
+      if (data.data?.shortUrl) {
+        shortUrl = data.data.shortUrl;
+      } else if (data.data?.shortLink) {
+        shortUrl = data.data.shortLink;
+      } else if (data.shortUrl) {
+        shortUrl = data.shortUrl;
+      } else if (data.shortLink) {
+        shortUrl = data.shortLink;
+      } else if (data.data?.shortCode) {
+        shortUrl = `${window.location.origin}/${data.data.shortCode}`;
+      } else if (data.shortCode) {
+        shortUrl = `${window.location.origin}/${data.shortCode}`;
+      }
+
+      if (!shortUrl) {
+        setMessage(
+          "Short link berhasil dibuat, tetapi response server belum dikenali."
+        );
+        return;
+      }
+
+      setResult({
+        shortUrl,
+        originalUrl: trimmedUrl,
+      });
+    } catch (error) {
+      console.error(error);
+      setMessage("Gagal terhubung ke server.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCopy = async () => {
+    if (!result) return;
+
+    try {
+      await navigator.clipboard.writeText(result.shortUrl);
+      setCopied(true);
+
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch {
+      setMessage("Gagal menyalin link.");
+    }
+  };
+
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-[#0a0c08] text-[#E8E9E3] selection:bg-[#D2FF00] selection:text-black font-['Space_Grotesk']">
-      {/* === BG LANDO NORRIS VIBES - HIGH OCTANE & GLOW === */}
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        {/* Base Background */}
-        <div className="absolute inset-0 bg-[#0a0c08]" />
-
-        {/* Dynamic Glowing Blobs */}
-        <div className="absolute -top-40 -left-40 h-[600px] w-[600px] rounded-full bg-[#D2FF00]/15 blur-[140px] animate-[blobMove_8s_ease-in-out_infinite_alternate]" />
-        <div className="absolute top-1/2 -right-40 h-[500px] w-[500px] rounded-full bg-[#00F0FF]/10 blur-[130px] animate-[blobMove_10s_ease-in-out_infinite_alternate-reverse]" />
-        <div className="absolute -bottom-40 left-1/3 h-[600px] w-[600px] rounded-full bg-[#D2FF00]/10 blur-[150px] animate-[blobMove_12s_ease-in-out_infinite_alternate]" />
-
-        {/* Tech Grid Pattern overlay */}
-        <div 
-          className="absolute inset-0 opacity-[0.05]" 
-          style={{
-            backgroundImage: `radial-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px)`,
-            backgroundSize: '32px 32px'
-          }}
-        />
-
-        {/* Noise Grain overlay */}
-        <div className="absolute inset-0 opacity-[0.07] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
-
-        {/* Vignette Accent */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(10,12,8,0.85)_100%)]" />
-      </div>
-
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@400;500;700&display=swap');
-        
-        @keyframes blobMove {
-          0% { transform: scale(1) translate(0, 0) rotate(0deg); }
-          50% { transform: scale(1.15) translate(-3%, 4%) rotate(3deg); }
-          100% { transform: scale(1.25) translate(4%, -3%) rotate(-3deg); }
-        }
-
-        .text-glow-hover {
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .text-glow-hover:hover {
-          text-shadow: 0 0 25px rgba(210, 255, 0, 0.75), 0 0 40px rgba(210, 255, 0, 0.4);
-        }
-
-        .text-glow-cyan:hover {
-          text-shadow: 0 0 25px rgba(0, 240, 255, 0.75), 0 0 40px rgba(0, 240, 255, 0.4);
-        }
-      `}</style>
-
-      {/* Header - Minimalist Bold F1 Style */}
-      <header className="sticky top-0 z-20 border-b border-white/[0.06] bg-[#0a0c08]/70 backdrop-blur-2xl">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-          <Link href="/" className="group font-['Syne'] text-[22px] font-extrabold tracking-tight text-white">
-            SHORTLINK<span className="text-[#D2FF00] inline-block transition-transform duration-300 group-hover:scale-150 group-hover:drop-shadow-[0_0_10px_#D2FF00]">.</span>
+    <div className="min-h-screen bg-[#F0FFFF] text-[#1F2022] selection:bg-[#E7E5E0] selection:text-[#1F2022]">
+      {/* Navigation */}
+      <header className="sticky top-0 z-40 border-b border-[#E7E5E0] bg-[#E0FFFF]/95 backdrop-blur-sm">
+        <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+          <Link
+            href="/"
+            className="font-serif text-2xl font-medium tracking-tight text-[#008B8B]"
+          >
+            ShortLink
+            
           </Link>
-          <div className="flex items-center gap-3">
-            <Link 
-              href="/login" 
-              className="rounded-full px-5 py-2.5 text-[12px] font-bold tracking-[0.15em] uppercase text-white/70 hover:text-white transition duration-300 hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]"
+
+          <div className="hidden items-center gap-8 md:flex">
+            <a
+              href="#features"
+              className="font-sans text-sm font-medium text-[#55575A] transition-colors hover:text-[#1F2022]"
             >
-              Masuk
+              Features
+            </a>
+
+            <a
+              href="#how-it-works"
+              className="font-sans text-sm font-medium text-[#55575A] transition-colors hover:text-[#1F2022]"
+            >
+              How it works
+            </a>
+          </div>
+
+          <div className="flex items-center gap-5">
+            <Link
+              href="/login"
+              className="rounded bg-[#696969] px-3.5 py-1.5 text-sm font-medium text-[#F8F8FF] transition-colors hover:text-[#F8F8FF] hover:bg-[#1F2055] "
+              >
+            
+              Sign in
             </Link>
-            <Link 
-              href="/register" 
-              className="relative group overflow-hidden rounded-full bg-[#D2FF00] px-6 py-2.5 text-[12px] font-bold tracking-[0.15em] uppercase text-black transition-all duration-300 hover:bg-[#e3ff4f] active:scale-95 shadow-[0_0_25px_rgba(210,255,0,0.4)] hover:shadow-[0_0_35px_rgba(210,255,0,0.7)]"
+
+            <Link
+              href="/register"
+              className="rounded bg-[#008B8B] px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[#1F2055]"
             >
-              Daftar
+              Get started
             </Link>
           </div>
         </nav>
       </header>
 
-      <main className="flex-1">
-        <section className="mx-auto max-w-6xl px-6 pb-24 pt-20 sm:pt-32">
-          {/* Hero Content */}
-          <div className="mx-auto max-w-3xl text-center">
-            {/* Badge */}
-            <div className="mb-8 inline-flex items-center gap-2.5 rounded-full border border-[#D2FF00]/30 bg-[#D2FF00]/10 px-5 py-2 backdrop-blur-xl shadow-[0_0_20px_rgba(210,255,0,0.15)] transition-transform duration-300 hover:scale-105">
-              <span className="h-2 w-2 animate-ping rounded-full bg-[#D2FF00]" />
-              <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#D2FF00]">
-                Platform Pemendek Link Modern
-              </span>
-            </div>
+      <main>
+        {/* Hero */}
+        <section className="mx-auto flex max-w-5xl flex-col items-center px-6 pb-16 pt-20 text-center sm:pt-24">
+         
 
-            {/* Main Interactive Hover Glow Title */}
-            <h1 className="font-['Syne'] text-[46px] font-[800] leading-[0.92] tracking-[-0.04em] text-white sm:text-[76px] cursor-default select-none">
-              <span className="inline-block transition-all duration-300 hover:scale-[1.02] hover:text-[#ffffff] text-glow-hover">
-                SATU LINK
-              </span>
-              <br />
-              <span className="text-[#D2FF00] inline-block transition-all duration-300 hover:scale-[1.03] text-glow-hover">
-                SINGKAT
-              </span>{" "}
-              <span className="inline-block transition-all duration-300 hover:scale-[1.02] hover:text-cyan-300 text-glow-cyan">
-                UNTUK SEMUA.
-              </span>
-            </h1>
+          <h1 className="max-w-2xl font-serif text-5xl font-medium leading-[1.2] tracking-tight text-[#008B8B] sm:text-6xl">
+            Shorter Link 
+          </h1>
 
-            {/* Subtitle with subtle glow on hover */}
-            <p className="mx-auto mt-8 max-w-xl text-[15px] leading-[1.8] text-white/60 transition-colors duration-300 hover:text-white/90">
-              Perpendek URL panjang, buat link kustom yang mudah diingat, dan lacak performa klik dengan analitik real-time dalam satu platform.
+         
+
+          {/* Shortener */}
+          <div className="mt-10 w-full max-w-xl">
+            <form
+              onSubmit={handleShorten}
+              className="flex flex-col gap-2 rounded-md border border-[#E7E5E0] bg-white p-1.5 shadow-sm transition focus-within:border-[#4D5D4B] focus-within:ring-1 focus-within:ring-[#4D5D4B]/30 sm:flex-row"
+            >
+              <div className="flex min-w-0 flex-1 items-center px-3">
+               
+
+                <input
+                  type="url"
+                  value={url}
+                  onChange={(event) => setUrl(event.target.value)}
+                  placeholder="https://your-long-url.com/very-long-link"
+                  required
+                  className="w-full border-0 bg-transparent py-2 text-sm font-mono text-[#1F2022] outline-none placeholder:text-[#A3A3A3] focus:ring-0"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="rounded bg-[#008B8B] px-5 py-2.5 text-sm font-semimedium text-white transition-colors hover:bg-[#1F2055] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loading ? "Shortening..." : "Shorten link "}
+              </button>
+            </form>
+
+            <p className="mt-3 flex items-center justify-center gap-2 text-xs text-[#55575A]">
+            
+              <span className="text-[#D6D3CE]">·</span>
+            
             </p>
 
-            {/* CTA Buttons */}
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link 
-                href="/register" 
-                className="group relative inline-flex w-full sm:w-auto items-center justify-center rounded-full bg-white px-8 py-4 text-[12px] font-bold tracking-[0.15em] uppercase text-black transition-all duration-300 hover:bg-[#D2FF00] active:scale-95 hover:shadow-[0_0_30px_rgba(210,255,0,0.5)]"
+            {message && (
+              <p className="mt-4 text-sm text-[#BA5C44]">
+                {message}
+              </p>
+            )}
+          </div>
+        </section>
+
+        {/* Result */}
+        <section className="mx-auto max-w-5xl px-6 pb-20">
+          <div className="mx-auto max-w-2xl">
+            <div className="mb-2 flex items-center justify-between px-1">
+              <span className="font-sans text-xs font-medium uppercase tracking-wider text-[#55575A]">
+                Link output
+              </span>
+
+              <span className="font-mono text-xs text-[#A3A3A3]">
+                {result ? "Status: Active" : "Siap"}
+              </span>
+            </div>
+
+            <div className="rounded-md border border-[#E7E5E0] bg-white p-5 shadow-sm">
+              {result ? (
+                <>
+                  <div className="flex flex-col justify-between gap-4 border-b border-[#E7E5E0] pb-4 sm:flex-row sm:items-center">
+                    <div className="min-w-0">
+                      <span className="mb-1 block font-mono text-xs uppercase tracking-wider text-[#A3A3A3]">
+                        Shortened link
+                      </span>
+
+                      <a
+                        href={result.shortUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block truncate font-mono text-base font-semibold text-[#1F2022] transition-colors hover:text-[#4D5D4B]"
+                      >
+                        {result.shortUrl}
+                      </a>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleCopy}
+                      className="shrink-0 rounded border border-[#E7E5E0] bg-[#F4F1EB] px-3 py-1.5 font-mono text-xs font-medium text-[#1F2022] transition-colors hover:bg-[#E7E5E0]"
+                    >
+                      {copied ? "Copied ✓" : "Copy link"}
+                    </button>
+                  </div>
+
+                  <div className="flex flex-col gap-3 pt-4 text-xs sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-baseline gap-2">
+                      <span className="shrink-0 font-mono text-[#A3A3A3]">
+                        Original:
+                      </span>
+
+                      <span
+                        className="truncate font-mono text-[#55575A]"
+                        title={result.originalUrl}
+                      >
+                        {result.originalUrl}
+                      </span>
+                    </div>
+
+                    <span className="shrink-0 font-mono text-[#55575A]">
+                      Newly created
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <div className="py-5 text-center">
+                  <p className="font-mono text-xs uppercase tracking-wider text-[#A3A3A3]">
+                    Your shortened link will appear here
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* How it works */}
+        <section
+          id="how-it-works"
+          className="border-y border-[#E7E5E0] bg-[#E0FFFF]/50 py-16"
+        >
+          <div className="mx-auto max-w-5xl px-6">
+            <div className="mb-10 max-w-md">
+              <span className="mb-2 block font-mono text-xs font-medium uppercase tracking-wider text-[#008B8B]">
+                Proses
+              </span>
+
+              <h2 className="font-serif text-2xl font-normal text-[#1F2022] sm:text-3xl">
+                Memiliki 3 urutan Langkah
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+              <div className="border-t border-[#E7E5E0] pt-4">
+                <span className="mb-2 block font-mono text-xs text-[#008B8B]">
+                  01
+                </span>
+
+                <h3 className="font-sans mb-1.3 text-base font-semibold text-[#1F2022]">
+                  Tempelkan URL Anda
+                </h3>
+
+                <p className="font-sans text-sm leading-relaxed text-[#55575A]">
+                  Tempelkan URL yang panjang dan ubah menjadi tautan pendek menjadi rapi.
+                </p>
+              </div>
+
+              <div className="border-t border-[#E7E5E0] pt-4">
+                <span className="mb-2 block font-mono text-xs text-[#008B8B]">
+                  02
+                </span>
+
+                <h3 className="font-sans mb-1.5 text-base font-semibold text-[#1F2022]">
+                  Dapatkan tautan pendek Anda
+                </h3>
+
+                <p className="font-sans text-sm leading-relaxed text-[#55575A]">
+                  Dapatkan tautan sederhana yang mudah diingat dan dibagikan.
+                </p>
+              </div>
+
+              <div className="border-t border-[#E7E5E0] pt-4">
+                <span className="mb-2 block font-mono text-xs text-[#008B8B]">
+                  03
+                </span>
+
+                <h3 className="font-sans mb-1.5 text-base font-semibold text-[#1F2022]">
+                  Lacak tautan Anda
+                </h3>
+
+                <p className="font-sans text-sm leading-relaxed text-[#55575A]">
+                  Lihat aktivitas klik dasar dari dasbor Anda.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Features */}
+        <section
+          id="features"
+          className="mx-auto max-w-5xl px-6 py-20"
+        >
+          <div className="mb-12 max-w-xl">
+            <span className="mb-2 block font-mono text-xs font-medium uppercase tracking-wider text-[#008B8B]">
+              Filosofi Desain
+            </span>
+
+            <h2 className="mb-3 font-serif text-3xl font-normal text-[#1F2022]">
+              Dibuat untuk kegunaan praktis.
+            </h2>
+
+            <p className="font-sans text-sm leading-relaxed text-[#55575A]">
+              Buat tautan pendek yang sederhana, kelola semuanya di satu tempat, dan pantau kinerjanya.
+            </p>
+          </div>
+
+          <div className="font-sans grid grid-cols-1 gap-x-12 gap-y-10 border-t border-[#E7E5E0] pt-8 md:grid-cols-2">
+            <Feature
+              title="Buat tautan pendek"
+              description="Ubah URL yang panjang menjadi tautan yang rapi dan ringkas, serta mudah dibagikan dan dikelola."
+            />
+
+            <Feature
+              title="Manajemen dasbor"
+              description="Kelola tautan yang telah Anda buat dari satu dasbor terpusat."
+            />
+
+            <Feature
+              title="Pelacakan klik dasar"
+              description="Lihat jumlah klik dasar untuk tautan Anda dan pahami kinerjanya."
+            />
+
+            <Feature
+              title="Akun & autentikasi"
+              description="Daftar, verifikasi email Anda, dan atur ulang kata sandi jika diperlukan."
+            />
+          </div>
+        </section>
+
+        {/* Final CTA */}
+        <section className="mx-auto max-w-5xl px-6 pb-20">
+          <div className="flex flex-col items-center rounded-md border border-[#E7E5E0] bg-white p-8 text-center sm:p-12">
+            <h2 className="mb-3 font-serif text-3xl font-normal text-[#1F2022] sm:text-4xl">
+              Siap menyederhanakan tautan Anda?
+            </h2>
+
+            <p className="font-sans mb-6 max-w-md text-sm leading-relaxed text-[#55575A] sm:text-base">
+              Buat tautan yang rapi dalam hitungan detik, lacak klik dasar,
+              dan kelola semuanya dari dasbor yang sederhana.
+            </p>
+
+            <div className="flex items-center gap-4">
+              <Link
+                href="/register"
+                className="rounded bg-[#008B8B] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1F2055]"
               >
-                Mulai Gratis Sekarang
-                <span className="ml-2 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1">↗</span>
+                Get started
               </Link>
-              <Link 
-                href="/login" 
-                className="inline-flex w-full sm:w-auto items-center justify-center rounded-full border border-white/15 bg-white/[0.03] px-8 py-4 text-[12px] font-bold tracking-[0.15em] uppercase text-white/80 backdrop-blur-xl transition-all duration-300 hover:bg-white/[0.1] hover:text-white hover:border-white/30 hover:shadow-[0_0_20px_rgba(255,255,255,0.15)]"
+
+              <Link
+                href="/login"
+                className="rounded bg-[#696969] px-5 py-2.5 text-sm font-medium text-[#F8F8FF] transition-colors hover:text-[#F8F8FF] hover:bg-[#1F2055] "
               >
-                Masuk ke Akun
+                Sign in 
               </Link>
             </div>
           </div>
-
-          {/* Features Cards with Glassmorphism + Neon Border Hover */}
-          <div className="mx-auto mt-24 grid max-w-5xl gap-6 sm:mt-32 sm:grid-cols-3">
-            {FEATURES.map((feature, index) => (
-              <article
-                key={index}
-                className="group relative rounded-[28px] border border-white/[0.08] bg-white/[0.02] p-8 backdrop-blur-2xl transition-all duration-500 hover:-translate-y-2 hover:border-[#D2FF00]/40 hover:bg-white/[0.05] hover:shadow-[0_10px_40px_-10px_rgba(210,255,0,0.15)]"
-              >
-                <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-2xl group-hover:bg-[#D2FF00] group-hover:text-black group-hover:border-[#D2FF00] group-hover:shadow-[0_0_20px_rgba(210,255,0,0.5)] transition-all duration-300">
-                  {feature.icon}
-                </div>
-                <h2 className="font-['Syne'] text-[20px] font-bold leading-tight text-white transition-colors duration-300 group-hover:text-[#D2FF00]">
-                  {feature.title}
-                </h2>
-                <p className="mt-3 text-[13px] leading-[1.7] text-white/50 group-hover:text-white/80 transition-colors duration-300">
-                  {feature.description}
-                </p>
-                <div className="absolute bottom-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-[#D2FF00]/0 to-transparent group-hover:via-[#D2FF00]/60 transition-all duration-500" />
-              </article>
-            ))}
-          </div>
-        </section>
+      </section>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-white/[0.06] bg-[#0a0c08]/80 py-8 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl flex-col sm:flex-row items-center justify-between gap-4 px-6">
-          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/40 hover:text-white/70 transition-colors">
-            Simple • Fast • Powerful Analytics
-          </p>
-          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/40 hover:text-white/70 transition-colors">
-            © 2026 Shortlink — Built by Irgi
-          </p>
+      <footer className="border-t border-[#E7E5E0] bg-[#E0FFFF] py-12">
+        <div className="mx-auto flex max-w-5xl flex-col justify-between gap-8 px-6 md:flex-row md:items-baseline">
+          <div>
+            <Link
+              href="/"
+              className="font-serif text-xl font-medium tracking-tight text-[#008B8B]"
+            >
+              ShortLink
+              <span className="text-[#BA5C44]"></span>
+            </Link>
+
+            
+          </div>
+
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-3 text-xs text-[#55575A]">
+            <a
+              href="#features"
+              className="transition-colors hover:text-[#1F2022]"
+            >
+              Features
+            </a>
+
+            <a
+              href="#how-it-works"
+              className="transition-colors hover:text-[#1F2022]"
+            >
+              How it works
+            </a>
+
+            <Link
+              href="/login"
+              className="transition-colors hover:text-[#1F2022]"
+            >
+              Login
+            </Link>
+
+            <Link
+              href="/register"
+              className="transition-colors hover:text-[#1F2022]"
+            >
+              Register
+            </Link>
+
+            <span className="text-[#D6D3CE]">|</span>
+
+            <span className="font-mono text-[#A3A3A3]">
+              © Shortlink By Irgi Kurniawan
+            </span>
+          </div>
         </div>
       </footer>
+    </div>
+  );
+}
+
+function Feature({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
+  return (
+    <div>
+      <h3 className="mb-2 flex items-center gap-2 text-base font-semibold text-[#1F2022]">
+        <span className="font-mono text-sm text-[#4D5D4B]">—</span>
+        {title}
+      </h3>
+
+      <p className="text-sm leading-relaxed text-[#55575A]">
+        {description}
+      </p>
     </div>
   );
 }
