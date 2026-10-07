@@ -149,7 +149,7 @@ export default function HomePage() {
           <div className="flex items-center gap-5">
             <Link
               href="/login"
-              className="rounded bg-[#696969] px-3.5 py-1.5 text-sm font-medium text-[#F8F8FF] transition-colors hover:text-[#F8F8FF] hover:bg-[#1F2055] "
+              className="font-sans rounded bg-[#696969] px-3.5 py-1.5 text-sm font-medium text-[#F8F8FF] transition-colors hover:text-[#F8F8FF] hover:bg-[#1F2055] "
               >
             
               Sign in
@@ -157,9 +157,9 @@ export default function HomePage() {
 
             <Link
               href="/register"
-              className="rounded bg-[#008B8B] px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[#1F2055]"
+              className="font-sans rounded bg-[#008B8B] px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[#1F2055]"
             >
-              Get started
+              Register
             </Link>
           </div>
         </nav>
@@ -191,14 +191,14 @@ export default function HomePage() {
                   onChange={(event) => setUrl(event.target.value)}
                   placeholder="https://your-long-url.com/very-long-link"
                   required
-                  className="w-full border-0 bg-transparent py-2 text-sm font-mono text-[#1F2022] outline-none placeholder:text-[#A3A3A3] focus:ring-0"
+                  className="font-sans w-full border-0 bg-transparent py-2 text-sm font-mono text-[#1F2022] outline-none placeholder:text-[#A3A3A3] focus:ring-0"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="rounded bg-[#008B8B] px-5 py-2.5 text-sm font-semimedium text-white transition-colors hover:bg-[#1F2055] disabled:cursor-not-allowed disabled:opacity-60"
+                className="font-sans rounded bg-[#008B8B] px-5 py-2.5 text-sm font-semimedium text-white transition-colors hover:bg-[#1F2055] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {loading ? "Shortening..." : "Shorten link "}
               </button>
@@ -226,7 +226,7 @@ export default function HomePage() {
                 Link output
               </span>
 
-              <span className="font-mono text-xs text-[#A3A3A3]">
+              <span className="font-sans text-xs text-[#A3A3A3]">
                 {result ? "Status: Active" : "Siap"}
               </span>
             </div>
@@ -280,7 +280,7 @@ export default function HomePage() {
                 </>
               ) : (
                 <div className="py-5 text-center">
-                  <p className="font-mono text-xs uppercase tracking-wider text-[#A3A3A3]">
+                  <p className="font-sans text-xs uppercase tracking-wider text-[#A3A3A3]">
                     Your shortened link will appear here
                   </p>
                 </div>
@@ -296,7 +296,7 @@ export default function HomePage() {
         >
           <div className="mx-auto max-w-5xl px-6">
             <div className="mb-10 max-w-md">
-              <span className="mb-2 block font-mono text-xs font-medium uppercase tracking-wider text-[#008B8B]">
+              <span className="font-sans mb-2 block font-mono text-xs font-medium uppercase tracking-wider text-[#008B8B]">
                 Proses
               </span>
 
@@ -357,7 +357,7 @@ export default function HomePage() {
           className="mx-auto max-w-5xl px-6 py-20"
         >
           <div className="mb-12 max-w-xl">
-            <span className="mb-2 block font-mono text-xs font-medium uppercase tracking-wider text-[#008B8B]">
+            <span className="font-sans mb-2 block font-mono text-xs font-medium uppercase tracking-wider text-[#008B8B]">
               Filosofi Desain
             </span>
 
@@ -408,14 +408,14 @@ export default function HomePage() {
             <div className="flex items-center gap-4">
               <Link
                 href="/register"
-                className="rounded bg-[#008B8B] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1F2055]"
+                className="font-sans rounded bg-[#008B8B] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1F2055]"
               >
-                Get started
+                Register
               </Link>
 
               <Link
                 href="/login"
-                className="rounded bg-[#696969] px-5 py-2.5 text-sm font-medium text-[#F8F8FF] transition-colors hover:text-[#F8F8FF] hover:bg-[#1F2055] "
+                className="font-sans rounded bg-[#696969] px-5 py-2.5 text-sm font-medium text-[#F8F8FF] transition-colors hover:text-[#F8F8FF] hover:bg-[#1F2055] "
               >
                 Sign in 
               </Link>
@@ -442,35 +442,35 @@ export default function HomePage() {
           <div className="flex flex-wrap items-center gap-x-8 gap-y-3 text-xs text-[#55575A]">
             <a
               href="#features"
-              className="transition-colors hover:text-[#1F2022]"
+              className="font-sans transition-colors hover:text-[#1F2022]"
             >
               Features
             </a>
 
             <a
               href="#how-it-works"
-              className="transition-colors hover:text-[#1F2022]"
+              className="font-sans transition-colors hover:text-[#1F2022]"
             >
               How it works
             </a>
 
             <Link
               href="/login"
-              className="transition-colors hover:text-[#1F2022]"
+              className="font-sans transition-colors hover:text-[#1F2022]"
             >
               Login
             </Link>
 
             <Link
               href="/register"
-              className="transition-colors hover:text-[#1F2022]"
+              className="font-sans transition-colors hover:text-[#1F2022]"
             >
               Register
             </Link>
 
             <span className="text-[#D6D3CE]">|</span>
 
-            <span className="font-mono text-[#A3A3A3]">
+            <span className="font-sans text-[#A3A3A3]">
               © Shortlink By Irgi Kurniawan
             </span>
           </div>
